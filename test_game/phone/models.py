@@ -5,8 +5,8 @@ class MyPhone(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     date = models.DateField(default=date.today)
-    id_specific = models.ManyToManyField("specific.MySpecific")  # Riferimento al modello tramite stringa
+    id_specific = models.ManyToManyField("specific.MySpecific")  # Reference to the model via string
     
     def __str__(self):
-        specific_ids = ", ".join(str(specific.id) for specific in self.id_specific.all())
+        specific_ids = ", ".join(map(str, self.id_specific.values_list('id', flat=True)))
         return f"{self.id} - {self.name} - {self.date} - [{specific_ids}]"
