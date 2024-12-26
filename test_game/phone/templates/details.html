@@ -1,0 +1,15 @@
+{% extends "master.html" %}
+
+{% block title %}
+  Details about {{ myphone.name }}
+{% endblock %}
+
+
+{% block content %}
+  <h1>{{ myphone.name }}</h1>
+  
+  <p>Date: {{ myphone.date }}</p>
+  
+  <p>Back to <a href="/phone">Phone</a></p>
+  
+{% endblock %}
