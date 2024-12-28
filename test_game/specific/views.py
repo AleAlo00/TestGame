@@ -1,6 +1,15 @@
-from django.http import HttpResponse
-from django.template import loader
+from django.shortcuts import render
+from .forms import MySpecificForm
+from characteristics.models import MyCharacteristics
 
-def specifics(request):
-  template = loader.get_template('specific.html')
-  return HttpResponse(template.render())
+def add_specific(request):
+    charact = MyCharacteristics.objects.all()
+
+    if request.method == 'POST':
+        form = MySpecificForm(request.POST)
+        if form.is_valid():
+            form.save()  
+    else:
+        form = MySpecificForm()
+
+    return render(request, 'add_specific.html', {'form': form, 'characteristics': charact})

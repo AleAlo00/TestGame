@@ -8,8 +8,17 @@
 {% block content %}
   <h1>{{ myphone.name }}</h1>
   
+  <p>ID: {{ myphone.id }}</p>
   <p>Date: {{ myphone.date }}</p>
-  
+  <p>Specific:</p>
+  <ul>
+    {% for specific in myphone.id_specific.all %}
+      <li>{{ specific.name }}</li> 
+    {% endfor %}
+  </ul>
+
+
+  <p>Add <a href="/characteristics">Characteristics</a></p>
   <p>Back to <a href="/phone">Phone</a></p>
   
 {% endblock %}

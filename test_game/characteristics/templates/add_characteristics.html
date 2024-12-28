@@ -1,0 +1,30 @@
+{% extends "master.html" %}
+
+{% block title %}
+Add Characteristics
+{% endblock %}
+
+{% block content %}
+
+<p><a href="/">HOME</a></p>
+<h1>Add Characteristics</h1>
+
+<form method="POST">
+    {% csrf_token %}
+    
+    <label for="name">Characteristic Name:</label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="id_cell">Phone:</label>
+    <select id="id_cell" name="id_cell" required>
+        {% for phone in phones %}
+            <option value="{{ phone.id }}">{{ phone.name }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Add Characteristics</button>
+</form>
+
+<p>Add <a href="/specific">Specific</a></p>
+
+{% endblock %}
