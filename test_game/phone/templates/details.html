@@ -1,24 +1,35 @@
 {% extends "master.html" %}
 
 {% block title %}
-  Details about {{ myphone.name }}
+Details about {{ myphone.name }}
 {% endblock %}
 
-
 {% block content %}
+<div>
   <h1>{{ myphone.name }}</h1>
-  
+
   <p>ID: {{ myphone.id }}</p>
   <p>Date: {{ myphone.date }}</p>
-  <p>Specific:</p>
   <ul>
-    {% for specific in myphone.id_specific.all %}
-      <li>{{ specific.name }}</li> 
+    {% for characteristic in myphone.id_characteristics.all %}
+    <li>
+      {{ characteristic.name }}
+      {% with characteristic.id_specific.all as specifics %}
+      {% if specifics %}
+      :
+      {% for specific in specifics %}
+      {{ specific.name }}{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+      {% else %}
+      (No specific assigned yet)
+      {% endif %}
+      {% endwith %}
+    </li>
     {% endfor %}
   </ul>
 
-
-  <p>Add <a href="/characteristics">Characteristics</a></p>
-  <p>Back to <a href="/phone">Phone</a></p>
-  
+  <p><a href="/characteristics/{{ myphone.id }}"> Add Characteristics</a></p>
+  <p><a href="/specific/{{ myphone.id }}">Add Specific</a></p>
+  <p><a href="/phone">Back to Phone</a></p>
+</div>
 {% endblock %}

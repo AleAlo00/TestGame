@@ -5,26 +5,26 @@ Add Characteristics
 {% endblock %}
 
 {% block content %}
+<div>
 
-<p><a href="/">HOME</a></p>
-<h1>Add Characteristics</h1>
+    <h1>Add Characteristics</h1>
 
-<form method="POST">
-    {% csrf_token %}
-    
-    <label for="name">Characteristic Name:</label>
-    <input type="text" id="name" name="name" required>
+    <form method="POST">
+        {% csrf_token %}
 
-    <label for="id_cell">Phone:</label>
-    <select id="id_cell" name="id_cell" required>
-        {% for phone in phones %}
+        <label for="name">Characteristic Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="id_cell">Phone:</label>
+        <select id="id_cell" name="id_cell" required>
             <option value="{{ phone.id }}">{{ phone.name }}</option>
-        {% endfor %}
-    </select>
+        </select>
 
-    <button type="submit">Add Characteristics</button>
-</form>
+        <button type="submit">Add Characteristics</button>
+    </form>
 
-<p>Add <a href="/specific">Specific</a></p>
+    <p><a href="/phone/details/{{ phone.id }}">Back to Phone</a></p>
+    <p><a href="/">HOME</a></p>
+</div>
 
 {% endblock %}

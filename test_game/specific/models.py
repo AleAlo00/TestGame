@@ -4,7 +4,7 @@ from characteristics.models import MyCharacteristics
 # Create your models here.
 class MySpecific(models.Model):
     id = models.AutoField(primary_key=True)
-    id_charact = models.ForeignKey(MyCharacteristics,on_delete=models.CASCADE)
+    id_charact = models.ForeignKey(MyCharacteristics,related_name='id_specific',on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
 
     def __str__(self):

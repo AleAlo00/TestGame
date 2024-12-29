@@ -6,23 +6,28 @@ Add Specific
 
 {% block content %}
 
-<p><a href="/">HOME</a></p>
-<h1>Add Specific</h1>
+<div>
 
-<form method="POST">
-    {% csrf_token %}
-    
-    <label for="id_charact">Characteristics:</label>
-    <select id="id_charact" name="id_charact" required>
-        {% for characteristic in characteristics %}
+    <h1>Add Specific</h1>
+
+    <h2>Phone: {{phone.name}}</h2>
+    <form method="POST">
+        {% csrf_token %}
+
+        <label for="id_charact">Characteristics:</label>
+        <select id="id_charact" name="id_charact" required>
+            {% for characteristic in characteristic %}
             <option value="{{ characteristic.id }}">{{ characteristic.name }}</option>
-        {% endfor %}
-    </select>
+            {% endfor %}
+        </select>
 
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required>
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
 
-    <button type="submit">Add Specific</button>
-</form>
+        <button type="submit">Add Specific</button>
+    </form>
+    <p><a href="/phone/details/{{ phone.id }}">Back to Phone</a></p>
+    <p><a href="/">HOME</a></p>
 
+</div>
 {% endblock %}
