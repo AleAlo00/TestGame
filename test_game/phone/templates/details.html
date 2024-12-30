@@ -11,28 +11,27 @@ Details about {{ myphone.name }}
   <p>ID: {{ myphone.id }}</p>
   <p>Date: {{ myphone.date }}</p>
 
-  <ul>
-    {% for key, value in default_characteristics.items %}
-      <li>{{ key }}: </li>
+  <ul id="characteristics-list">
+    {% for key, value in myphone.characteristics.items %}
+      <li>{{ key }}: {{ value }}</li>
     {% endfor %}
   </ul>
 
-  <form action="{% url 'add_specific' myphone.id %}" method="POST">
+  <form action="{% url 'add_specific' phone_id=myphone.id %}" method="POST">
     {% csrf_token %}
-
-    <!-- Seleziona una caratteristica -->
     <label for="characteristic">Choose a characteristic:</label>
     <select name="characteristic" id="characteristic">
-      <option value>Select a characteristic</option>
+      <option value="">Select a characteristic</option>
       {% for key in default_characteristics.keys %}
-      <option value="{{ key }}">{{ key }}</option>
+        {% if key not in myphone.characteristics %}
+          <option value="{{ key }}">{{ key }}</option>
+        {% endif %}
       {% endfor %}
     </select>
 
-    <!-- Seleziona una specifica per la caratteristica scelta -->
     <label for="specific">Choose a specific:</label>
     <select name="specific" id="specific">
-      <option value>Select a specific</option>
+      <option value="">Select a specific</option>
     </select>
 
     <button type="submit">Add Specific</button>
@@ -52,9 +51,9 @@ Details about {{ myphone.name }}
     const selectedCharacteristic = characteristicSelect.value;
     
     // Pulisce la lista delle specifiche
-    specificSelect.innerHTML = '<option value>Select a specific</option>';
+    specificSelect.innerHTML = '<option value="">Select a specific</option>';
 
-    if (selectedCharacteristic) {
+    if (selectedCharacteristic && characteristics[selectedCharacteristic]) {
       // Aggiungi le opzioni corrispondenti alle specifiche
       const specifics = characteristics[selectedCharacteristic];
       specifics.forEach(function(spec) {

@@ -1,5 +1,5 @@
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.shortcuts import render, redirect,  get_object_or_404
 from .models import MyPhone
@@ -41,11 +41,20 @@ def add_phone(request):
       return redirect('details', id=phone.id) 
   return render(request, 'add_phone.html', {'phone': None}) 
 
+
+
 def add_specific(request, phone_id):
-  if request.method == "POST":
-      specific = request.POST.get('specific')
-      myphone = get_object_or_404(MyPhone, id=phone_id)
-      # Aggiungi la specifica al telefono (modifica come necessario)
-      myphone.specifics.append(specific)
-      myphone.save()
-      return redirect('phone_detail', phone_id=phone_id)
+    phone = get_object_or_404(MyPhone, id=phone_id)
+
+    if request.method == 'POST':
+        characteristic = request.POST.get('characteristic')
+        specific = request.POST.get('specific')
+
+        if characteristic and specific:
+            # Aggiungi la specifica al telefono
+            phone.characteristics[characteristic] = specific
+            phone.save()
+
+
+    # Se la richiesta non è POST, ritorna la pagina con il modulo
+    return render(request, 'details.html', {'myphone': phone, 'default_characteristics': DEFAULT_CHARACTERISTICS})

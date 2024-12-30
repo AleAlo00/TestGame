@@ -5,6 +5,7 @@ class MyPhone(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     date = models.DateField(default=date.today)
+    characteristics = models.JSONField(default=dict) 
 
     def __str__(self):
-        return f"{self.id} - {self.name} - {self.date} "
+        return f"{self.id} - {self.name} - {self.date} - {self.characteristics}"

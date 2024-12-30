@@ -8,6 +8,7 @@ DEFAULT_CHARACTERISTICS = {
     "Storage": ["16GB", "32GB", "64GB", "128GB", "256GB"],
     "OS": ["Android", "iOS"],
     "Camera": ["5MP", "8MP", "12MP", "16MP", "20MP"],
+    "Brand": ["Samsung", "Apple", "Huawei", "Xiaomi", "Oppo"],
 }
 
 class MyDictCharacteristic(models.Model):
