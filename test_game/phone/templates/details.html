@@ -41,13 +41,19 @@ Details about {{ myphone.name }}
     <p><a href="/phone">Back to Phone</a></p>
   </div>
   <div class="box">
-    <div id="phone-image"></div>
+    <div id="phone-image">
+      <div id="phone-screen">
+        <!-- Il logo verrà visualizzato al centro dello schermo -->
+        <div id="phone-logo" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+          <img id="logo-img" src="" alt="Phone Brand" style="max-width: 100px; max-height: 100px;">
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
   // Recupera il colore dal localStorage o dalle caratteristiche del telefono
-  // Recupera il colore specifico del telefono corrente
   let currentColor;
 
   // Controlla se il colore è presente nel localStorage per questo telefono
@@ -70,6 +76,31 @@ Details about {{ myphone.name }}
   const characteristics = {{ default_characteristics|safe }};
   const characteristicSelect = document.getElementById("characteristic");
   const specificSelect = document.getElementById("specific");
+
+  // Aggiungi una mappa dei loghi
+  const logoMap = {
+    "Samsung": "/static/logos/samsung.png",
+    "Apple": "/static/logos/apple.png",
+    "Huawei": "/static/logos/huawei.png",
+    "Xiaomi": "/static/logos/xiaomi.png",
+    "Oppo": "/static/logos/oppo.png"
+  };
+
+  // Aggiorna la visualizzazione del logo in base al brand
+  const logoImg = document.getElementById("logo-img");
+
+  // Inizializza il logo del brand
+  function updateLogo(brand) {
+    if (brand && logoMap[brand]) {
+      logoImg.src = logoMap[brand]; // Aggiorna il logo con il path dell'immagine
+    } else {
+      logoImg.src = ""; // Nessun logo disponibile
+    }
+  }
+
+  // Mostra il logo del brand iniziale
+  const initialBrand = "{{ myphone.characteristics.Brand|default:'' }}";
+  updateLogo(initialBrand);
 
   // Aggiorna le opzioni specifiche in base alla caratteristica selezionata
   characteristicSelect.addEventListener("change", function () {
@@ -101,6 +132,12 @@ Details about {{ myphone.name }}
     } else {
       // Mantieni il colore attuale se la specifica non è il colore
       phoneImage.style.backgroundColor = currentColor;
+    }
+
+    // Aggiorna il logo se la specifica riguarda il brand
+    if (selectedSpecific && characteristicSelect.value === "Brand") {
+      const brand = selectedSpecific; // Brand scelto
+      updateLogo(brand); // Modifica il logo del brand
     }
   });
 
