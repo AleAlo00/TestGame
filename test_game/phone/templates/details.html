@@ -5,58 +5,82 @@ Details about {{ myphone.name }}
 {% endblock %}
 
 {% block content %}
-<div>
-  <h1>{{ myphone.name }}</h1>
+<div class="container">
+  <div class="box">
+    <h1>{{ myphone.name }}</h1>
 
-  <p>ID: {{ myphone.id }}</p>
-  <p>Date: {{ myphone.date }}</p>
+    <p>ID: {{ myphone.id }}</p>
+    <p>Date: {{ myphone.date }}</p>
 
-  <ul id="characteristics-list">
-    {% for key, value in myphone.characteristics.items %}
+    <ul id="characteristics-list">
+      {% for key, value in myphone.characteristics.items %}
       <li>{{ key }}: {{ value }}</li>
-    {% endfor %}
-  </ul>
-
-  <form action="{% url 'add_specific' phone_id=myphone.id %}" method="POST">
-    {% csrf_token %}
-    <label for="characteristic">Choose a characteristic:</label>
-    <select name="characteristic" id="characteristic">
-      <option value="">Select a characteristic</option>
-      {% for key in default_characteristics.keys %}
-        {% if key not in myphone.characteristics %}
-          <option value="{{ key }}">{{ key }}</option>
-        {% endif %}
       {% endfor %}
-    </select>
+    </ul>
 
-    <label for="specific">Choose a specific:</label>
-    <select name="specific" id="specific">
-      <option value="">Select a specific</option>
-    </select>
+    <form action="{% url 'add_specific' phone_id=myphone.id %}" method="POST">
+      {% csrf_token %}
+      <label for="characteristic">Choose a characteristic:</label>
+      <select name="characteristic" id="characteristic">
+        <option value>Select a characteristic</option>
+        {% for key in default_characteristics.keys %}
+        {% if key not in myphone.characteristics %}
+        <option value="{{ key }}">{{ key }}</option>
+        {% endif %}
+        {% endfor %}
+      </select>
 
-    <button type="submit">Add Specific</button>
-  </form>
+      <label for="specific">Choose a specific:</label>
+      <select name="specific" id="specific">
+        <option value>Select a specific</option>
+      </select>
 
-  <p><a href="/phone">Back to Phone</a></p>
+      <button type="submit">Add Specific</button>
+    </form>
+
+    <p><a href="/phone">Back to Phone</a></p>
+  </div>
+  <div class="box">
+    <div id="phone-image"></div>
+  </div>
 </div>
 
 <script>
-  // Crea un oggetto che mappa le caratteristiche alle loro specifiche
+  // Recupera il colore dal localStorage o dalle caratteristiche del telefono
+  // Recupera il colore specifico del telefono corrente
+  let currentColor;
+
+  // Controlla se il colore è presente nel localStorage per questo telefono
+  const phoneId = {{ myphone.id|safe }}; // Usa l'ID del telefono come chiave unica
+  const storedColor = localStorage.getItem(`phoneColor_${phoneId}`);
+
+  if (storedColor) {
+    currentColor = storedColor; // Colore salvato in precedenza
+  } else if ("Color" in {{ myphone.characteristics|safe }} && "{{ myphone.characteristics.Color|default:'' }}") {
+    currentColor = "{{ myphone.characteristics.Color|default:'' }}".toLowerCase(); // Colore dalla caratteristica
+  } else {
+    currentColor = "gray"; // Colore di default
+  }
+
+  // Imposta il colore iniziale del telefono
+  const phoneImage = document.getElementById("phone-image");
+  phoneImage.style.backgroundColor = currentColor;
+
+  // Recupera gli elementi del DOM per caratteristiche e specifiche
   const characteristics = {{ default_characteristics|safe }};
-  
   const characteristicSelect = document.getElementById("characteristic");
   const specificSelect = document.getElementById("specific");
 
-  characteristicSelect.addEventListener("change", function() {
+  // Aggiorna le opzioni specifiche in base alla caratteristica selezionata
+  characteristicSelect.addEventListener("change", function () {
     const selectedCharacteristic = characteristicSelect.value;
-    
+
     // Pulisce la lista delle specifiche
     specificSelect.innerHTML = '<option value="">Select a specific</option>';
 
     if (selectedCharacteristic && characteristics[selectedCharacteristic]) {
-      // Aggiungi le opzioni corrispondenti alle specifiche
       const specifics = characteristics[selectedCharacteristic];
-      specifics.forEach(function(spec) {
+      specifics.forEach(function (spec) {
         const option = document.createElement("option");
         option.value = spec;
         option.textContent = spec;
@@ -64,5 +88,22 @@ Details about {{ myphone.name }}
       });
     }
   });
+
+  // Gestisce la modifica delle specifiche
+  specificSelect.addEventListener("change", function () {
+    const selectedSpecific = specificSelect.value;
+
+    if (selectedSpecific && characteristicSelect.value === "Color") {
+      const color = selectedSpecific.toLowerCase(); // Colore scelto
+      phoneImage.style.backgroundColor = color; // Aggiorna il colore in tempo reale
+      localStorage.setItem(`phoneColor_${phoneId}`, color); // Salva il colore nel localStorage con l'ID del telefono
+      currentColor = color; // Aggiorna la variabile del colore attuale
+    } else {
+      // Mantieni il colore attuale se la specifica non è il colore
+      phoneImage.style.backgroundColor = currentColor;
+    }
+  });
+
 </script>
+
 {% endblock %}
