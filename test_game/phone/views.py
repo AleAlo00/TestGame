@@ -2,8 +2,7 @@
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.shortcuts import render, redirect,  get_object_or_404
-from .models import MyPhone
-from dict_charact.models import DEFAULT_CHARACTERISTICS
+from .models import MyPhone, DEFAULT_CHARACTERISTICS
 
 
 def phones(request):
