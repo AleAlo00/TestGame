@@ -7,7 +7,7 @@ DEFAULT_CHARACTERISTICS = {
     "Color": ["Black", "White", "Red", "Blue", "Green"],
     "Storage": ["16GB", "32GB", "64GB", "128GB", "256GB"],
     "OS": ["Android", "iOS"],
-    "Camera": ["5MP", "8MP", "12MP", "16MP", "20MP"],
+    "Numero Camera": ["1", "2", "3", "4"],
     "Brand": ["Samsung", "Apple", "Huawei", "Xiaomi", "Oppo"],
 }
 
