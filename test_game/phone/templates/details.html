@@ -41,7 +41,6 @@ Details about {{ myphone.name }}
     <p><a href="/phone">Back to Phone</a></p>
   </div>
 
-  
   <div class="box" style="position: relative;">
     <div id="phone-image" style="position: relative;">
       <!-- Contenitore del fronte -->
@@ -56,10 +55,15 @@ Details about {{ myphone.name }}
         </div>
       </div>
 
-      <!-- Retro senza modificare il colore originale -->
+      <!-- Retro del telefono -->
       <div id="phone-back"
         style="position: absolute; width: 100%; height: 100%; border-radius: 40px; display: none;">
+        <!-- Aggiungi telecamere -->
+        <div id="cameras" style="position: absolute; top: 10px; left: 10px;">
+          <!-- Le telecamere verranno aggiunte dinamicamente qui -->
+        </div>
       </div>
+
     </div>
     <!-- Bottone circolare in alto a destra -->
     <button id="rotate-button" onclick="rotatePhone()"
@@ -67,117 +71,260 @@ Details about {{ myphone.name }}
       background-color: #007BFF; color: white; border: none; cursor: pointer;">↻</button>
   </div>
 
+
   <script>
-      // Recupera il colore dal localStorage o dalle caratteristiche del telefono
-      let currentColor;
-    
-      // Controlla se il colore è presente nel localStorage per questo telefono
-      const phoneId = {{ myphone.id|safe }}; // Usa l'ID del telefono come chiave unica
-      const storedColor = localStorage.getItem(`phoneColor_${phoneId}`);
-    
-      if (storedColor) {
-        currentColor = storedColor; // Colore salvato in precedenza
-      } else if ("Color" in {{ myphone.characteristics|safe }} && "{{ myphone.characteristics.Color|default:'' }}") {
-        currentColor = "{{ myphone.characteristics.Color|default:'' }}".toLowerCase(); // Colore dalla caratteristica
-      } else {
-        currentColor = "gray"; // Colore di default
+    // Recupera il colore dal localStorage o dalle caratteristiche del telefono
+let currentColor;
+
+// Controlla se il colore è presente nel localStorage per questo telefono
+const phoneId = {{ myphone.id|safe }}; // Usa l'ID del telefono come chiave unica
+const storedColor = localStorage.getItem(`phoneColor_${phoneId}`);
+
+if (storedColor) {
+  currentColor = storedColor; // Colore salvato in precedenza
+} else if ("Color" in {{ myphone.characteristics|safe }} && "{{ myphone.characteristics.Color|default:'' }}") {
+  currentColor = "{{ myphone.characteristics.Color|default:'' }}".toLowerCase(); // Colore dalla caratteristica
+} else {
+  currentColor = "gray"; // Colore di default
+}
+
+// Imposta il colore iniziale del telefono
+const phoneImage = document.getElementById("phone-image");
+phoneImage.style.backgroundColor = currentColor;
+
+// Recupera gli elementi del DOM per caratteristiche e specifiche
+const characteristics = {{ default_characteristics|safe }};
+const characteristicSelect = document.getElementById("characteristic");
+const specificSelect = document.getElementById("specific");
+
+// Aggiungi una mappa dei loghi
+const logoMap = {
+  "Samsung": "/static/logos/samsung.png",
+  "Apple": "/static/logos/apple.png",
+  "Huawei": "/static/logos/huawei.png",
+  "Xiaomi": "/static/logos/xiaomi.png",
+  "Oppo": "/static/logos/oppo.png"
+};
+
+// Aggiorna la visualizzazione del logo in base al brand
+const logoImg = document.getElementById("logo-img");
+
+// Inizializza il logo del brand
+function updateLogo(brand) {
+  if (brand && logoMap[brand]) {
+    logoImg.src = logoMap[brand]; // Aggiorna il logo con il path dell'immagine
+  } else {
+    logoImg.src = ""; // Nessun logo disponibile
+  }
+}
+
+// Mostra il logo del brand iniziale
+const initialBrand = "{{ myphone.characteristics.Brand|default:'' }}";
+updateLogo(initialBrand);
+
+// Recupera il numero di telecamere dal localStorage
+const storedNumCameras = localStorage.getItem(`phoneCameras_${phoneId}`);
+if (storedNumCameras) {
+  updateCameras(parseInt(storedNumCameras, 10)); // Carica il numero di telecamere salvato
+}
+
+// Aggiorna le opzioni specifiche in base alla caratteristica selezionata
+characteristicSelect.addEventListener("change", function () {
+  const selectedCharacteristic = characteristicSelect.value;
+
+  // Pulisce la lista delle specifiche
+  specificSelect.innerHTML = '<option value="">Select a specific</option>';
+
+  if (selectedCharacteristic && characteristics[selectedCharacteristic]) {
+    const specifics = characteristics[selectedCharacteristic];
+    specifics.forEach(function (spec) {
+      const option = document.createElement("option");
+      option.value = spec;
+      option.textContent = spec;
+      specificSelect.appendChild(option);
+    });
+  }
+
+  // Se la caratteristica è "Camera", ruota il telefono per mostrare il retro
+  if (selectedCharacteristic === "NumeroCamera") {
+    rotatePhone(); // Gira il telefono sul retro
+  } else {
+    // Se la caratteristica non è "Camera", mostra il fronte del telefono
+    const frontElement = document.getElementById("phone-front");
+    const backElement = document.getElementById("phone-back");
+    frontElement.style.display = "block";
+    backElement.style.display = "none";
+  }
+});
+
+// Gestisce la modifica delle specifiche
+specificSelect.addEventListener("change", function () {
+  const selectedSpecific = specificSelect.value;
+
+  if (selectedSpecific && characteristicSelect.value === "Color") {
+    const color = selectedSpecific.toLowerCase(); // Colore scelto
+    phoneImage.style.backgroundColor = color; // Aggiorna il colore in tempo reale
+    localStorage.setItem(`phoneColor_${phoneId}`, color); // Salva il colore nel localStorage con l'ID del telefono
+    currentColor = color; // Aggiorna la variabile del colore attuale
+  } else {
+    // Mantieni il colore attuale se la specifica non è il colore
+    phoneImage.style.backgroundColor = currentColor;
+  }
+
+  // Aggiorna il logo se la specifica riguarda il brand
+  if (selectedSpecific && characteristicSelect.value === "Brand") {
+    const brand = selectedSpecific; // Brand scelto
+    updateLogo(brand); // Modifica il logo del brand
+  }
+
+  // Se la specifica riguarda le telecamere, aggiorna il numero di telecamere
+  if (selectedSpecific && characteristicSelect.value === "NumeroCamera") {
+    const numCameras = parseInt(selectedSpecific, 10); // Numero di telecamere scelto
+    updateCameras(numCameras); // Modifica le telecamere
+
+    // Salva il numero di telecamere nel localStorage
+    localStorage.setItem(`phoneCameras_${phoneId}`, numCameras);
+  }
+});
+
+function updateCameras(numCameras) {
+  const camerasContainer = document.getElementById("cameras");
+  camerasContainer.innerHTML = ''; // Pulisce le telecamere precedenti
+
+  const cameraWidth = 30; // Larghezza della telecamera
+  const spaceBetween = 50; // Spaziatura tra le telecamere
+  const offsetX = 30; // Spaziatura orizzontale per la centratura a destra
+
+  // Aggiungi un elemento per la cornice esterna delle telecamere
+  const frame = document.createElement("div");
+  frame.style.position = "absolute";
+  frame.style.top = "10px";
+  frame.style.left = "15px"; 
+  frame.style.borderRadius = "20px"; // Bordi arrotondati
+  frame.style.border = `2px solid black`; // Cornice nera
+  
+  
+  if (currentColor === "black") {
+    frame.style.border = "2px solid #252525";
+    frame.style.backgroundColor = "#252525";
+  } else {
+    frame.style.filter = "brightness(80%)";
+    frame.style.backgroundColor = `${currentColor}`
+  }
+  frame.style.padding = "5px"; 
+
+  // Se non ci sono telecamere, nascondi il contenitore
+  if (numCameras === 0) {
+    camerasContainer.style.display = 'none';
+  } else {
+    camerasContainer.style.display = 'block'; // Mostra il contenitore delle telecamere
+
+    // Posiziona la cornice in base al numero di telecamere
+    if (numCameras === 1 || numCameras === 2) {
+      frame.style.width = `${cameraWidth + 2 * 5}px`; // Per 1 o 2 telecamere, dimensione rettangolare
+      frame.style.height = `${cameraWidth + (numCameras - 1) * spaceBetween + 2 * 5}px`; // Altezza variabile per 2 telecamere
+    } else if (numCameras === 3 || numCameras === 4) {
+      frame.style.width = `${cameraWidth * 1.2 + spaceBetween}px`; // Per 3 o 4 telecamere, dimensione quadrata
+      frame.style.height = `${cameraWidth * 1.2 + spaceBetween}px`; // Altezza quadrata
+    }
+
+    // Aggiungi la cornice al contenitore delle telecamere
+    camerasContainer.appendChild(frame);
+
+    // Posiziona le telecamere all'interno della cornice
+    if (numCameras === 1) {
+      const camera = document.createElement("div");
+      camera.classList.add("camera");
+      camera.style.position = "absolute";
+      camera.style.top = `10px`; // Posizione in alto
+      camera.style.left = `${(frame.offsetWidth - cameraWidth) / 6 + offsetX}px`; // Centrato orizzontalmente e spostato a destra
+      camera.style.width = `${cameraWidth}px`;
+      camera.style.height = `${cameraWidth}px`;
+      camera.style.borderRadius = "50%";
+      camera.style.backgroundColor = "black"; // Colore della telecamera
+      camerasContainer.appendChild(camera);
+    } else if (numCameras === 2) {
+      for (let i = 0; i < numCameras; i++) {
+        const camera = document.createElement("div");
+        camera.classList.add("camera");
+        camera.style.position = "absolute";
+
+        // Posizione verticale
+        camera.style.top = `${i * spaceBetween + 10}px`; // Spaziatura verticale
+        camera.style.left = `${(frame.offsetWidth - cameraWidth) / 6 + offsetX}px`; // Centrato orizzontalmente e spostato a destra
+
+        camera.style.width = `${cameraWidth}px`;
+        camera.style.height = `${cameraWidth}px`;
+        camera.style.borderRadius = "50%";
+        camera.style.backgroundColor = "black"; // Colore della telecamera
+        camerasContainer.appendChild(camera);
       }
-    
-      // Imposta il colore iniziale del telefono
-      const phoneImage = document.getElementById("phone-image");
-      phoneImage.style.backgroundColor = currentColor;
-    
-      // Recupera gli elementi del DOM per caratteristiche e specifiche
-      const characteristics = {{ default_characteristics|safe }};
-      const characteristicSelect = document.getElementById("characteristic");
-      const specificSelect = document.getElementById("specific");
-    
-      // Aggiungi una mappa dei loghi
-      const logoMap = {
-        "Samsung": "/static/logos/samsung.png",
-        "Apple": "/static/logos/apple.png",
-        "Huawei": "/static/logos/huawei.png",
-        "Xiaomi": "/static/logos/xiaomi.png",
-        "Oppo": "/static/logos/oppo.png"
-      };
-    
-      // Aggiorna la visualizzazione del logo in base al brand
-      const logoImg = document.getElementById("logo-img");
-    
-      // Inizializza il logo del brand
-      function updateLogo(brand) {
-        if (brand && logoMap[brand]) {
-          logoImg.src = logoMap[brand]; // Aggiorna il logo con il path dell'immagine
-        } else {
-          logoImg.src = ""; // Nessun logo disponibile
+    } else if (numCameras === 3) {
+      for (let i = 0; i < numCameras; i++) {
+        const camera = document.createElement("div");
+        camera.classList.add("camera");
+        camera.style.position = "absolute";
+
+        if (i === 0) {
+          camera.style.top = `10px`;
+          camera.style.left = `${(frame.offsetWidth - cameraWidth) / 6 + offsetX}px`;
+        } else if (i === 1) {
+          camera.style.top = `${spaceBetween + 10}px`;
+          camera.style.left = `${(frame.offsetWidth - cameraWidth) / 6 + offsetX}px`;
+        } else if (i === 2) {
+          camera.style.top = `${spaceBetween + 10 - 25}px`;
+          camera.style.left = `${(frame.offsetWidth - cameraWidth) / 7 + offsetX + spaceBetween * 0.8}px`;
         }
+
+        camera.style.width = `${cameraWidth}px`;
+        camera.style.height = `${cameraWidth}px`;
+        camera.style.borderRadius = "50%";
+        camera.style.backgroundColor = "black"; 
+        camerasContainer.appendChild(camera);
       }
-    
-      // Mostra il logo del brand iniziale
-      const initialBrand = "{{ myphone.characteristics.Brand|default:'' }}";
-      updateLogo(initialBrand);
-    
-      // Aggiorna le opzioni specifiche in base alla caratteristica selezionata
-      characteristicSelect.addEventListener("change", function () {
-        const selectedCharacteristic = characteristicSelect.value;
-    
-        // Pulisce la lista delle specifiche
-        specificSelect.innerHTML = '<option value="">Select a specific</option>';
-    
-        if (selectedCharacteristic && characteristics[selectedCharacteristic]) {
-          const specifics = characteristics[selectedCharacteristic];
-          specifics.forEach(function (spec) {
-            const option = document.createElement("option");
-            option.value = spec;
-            option.textContent = spec;
-            specificSelect.appendChild(option);
-          });
-        }
-    
-        // Se la caratteristica è "Camera", ruota il telefono per mostrare il retro
-        if (selectedCharacteristic === "Numero Camera") {
-          rotatePhone(); // Gira il telefono sul retro
-        }
-      });
-    
-      // Gestisce la modifica delle specifiche
-      specificSelect.addEventListener("change", function () {
-        const selectedSpecific = specificSelect.value;
-    
-        if (selectedSpecific && characteristicSelect.value === "Color") {
-          const color = selectedSpecific.toLowerCase(); // Colore scelto
-          phoneImage.style.backgroundColor = color; // Aggiorna il colore in tempo reale
-          localStorage.setItem(`phoneColor_${phoneId}`, color); // Salva il colore nel localStorage con l'ID del telefono
-          currentColor = color; // Aggiorna la variabile del colore attuale
-        } else {
-          // Mantieni il colore attuale se la specifica non è il colore
-          phoneImage.style.backgroundColor = currentColor;
-        }
-    
-        // Aggiorna il logo se la specifica riguarda il brand
-        if (selectedSpecific && characteristicSelect.value === "Brand") {
-          const brand = selectedSpecific; // Brand scelto
-          updateLogo(brand); // Modifica il logo del brand
-        }
-      });
-    
-      // Funzione per girare il telefono
-      let isFront = true; // Variabile per tracciare lo stato attuale (fronte o retro)
-      
-      function rotatePhone() {
-        const frontElement = document.getElementById("phone-front");
-        const backElement = document.getElementById("phone-back");
-    
-        if (isFront) {
-          frontElement.style.display = "none";
-          backElement.style.display = "block";
-        } else {
-          frontElement.style.display = "block";
-          backElement.style.display = "none";
-        }
-    
-        isFront = !isFront; // Cambia lo stato
+    } else if (numCameras === 4) {
+      for (let i = 0; i < numCameras; i++) {
+        const camera = document.createElement("div");
+        camera.classList.add("camera");
+        camera.style.position = "absolute";
+
+        const row = Math.floor(i / 2);
+        const col = i % 2;
+
+        const adjustedSpaceBetween = spaceBetween * 0.9;
+
+        camera.style.top = `${row * adjustedSpaceBetween + 10}px`;
+        camera.style.left = `${col * adjustedSpaceBetween + (frame.offsetWidth - cameraWidth * 2) / 10 + offsetX}px`; // Spostato a destra
+
+        camera.style.width = `${cameraWidth}px`;
+        camera.style.height = `${cameraWidth}px`;
+        camera.style.borderRadius = "50%";
+        camera.style.backgroundColor = "black";
+        camerasContainer.appendChild(camera);
       }
-    </script>
+    }
+  }
+}
+
+
+// Funzione per girare il telefono
+let isFront = true; // Variabile per tracciare lo stato attuale (fronte o retro)
+
+function rotatePhone() {
+  const frontElement = document.getElementById("phone-front");
+  const backElement = document.getElementById("phone-back");
+
+  if (isFront) {
+    frontElement.style.display = "none";
+    backElement.style.display = "block";
+  } else {
+    frontElement.style.display = "block";
+    backElement.style.display = "none";
+  }
+
+  isFront = !isFront; // Cambia lo stato
+}
+
+  </script>
 
   {% endblock %}
