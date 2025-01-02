@@ -141,6 +141,21 @@ select option:checked {
   transform: translate(-50%, -50%);
 }
 
+#phone-screen-on {
+  width: 220px;
+  /* Larghezza dello schermo */
+  height: 440px;
+  /* Altezza dello schermo */
+  border-radius: 30px;
+  /* Angoli arrotondati dello schermo */
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5);
+  /* Effetto di profondità */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 /* Retro (senza sovrascrivere il colore del contenitore) */
 #phone-back {
   background: none;

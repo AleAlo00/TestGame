@@ -2,7 +2,7 @@
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.shortcuts import render, redirect,  get_object_or_404
-from .models import MyPhone, DEFAULT_CHARACTERISTICS
+from .models import MyPhone, MyDictCharacteristic, MyFunction
 
 
 def phones(request):
@@ -16,8 +16,8 @@ def phones(request):
 def details(request, id):
     myphone = get_object_or_404(MyPhone, id=id)
 
-    # Prepara la lista di specifiche per ogni caratteristica
-    characteristics_and_specifics = DEFAULT_CHARACTERISTICS
+    # Recupera le caratteristiche e le funzioni dal database
+    characteristics_and_specifics = MyDictCharacteristic.to_dict()
 
     context = {
         'myphone': myphone,
@@ -25,6 +25,21 @@ def details(request, id):
     }
 
     return render(request, 'details.html', context)
+
+
+def detailsF(request, id):
+    myphone = get_object_or_404(MyPhone, id=id)
+
+    functions = MyFunction.to_dict()
+
+    context = {
+        'myphone': myphone,
+        'default_functions': functions,
+    }
+
+    return render(request, 'detailsF.html', context)
+
+
 
 def main(request):
   template = loader.get_template('main.html')
@@ -41,7 +56,6 @@ def add_phone(request):
   return render(request, 'add_phone.html', {'phone': None}) 
 
 
-
 def add_specific(request, phone_id):
     phone = get_object_or_404(MyPhone, id=phone_id)
 
@@ -54,6 +68,19 @@ def add_specific(request, phone_id):
             phone.characteristics[characteristic] = specific
             phone.save()
 
+    return render(request, 'details.html', {'myphone': phone, 'default_characteristics': MyDictCharacteristic.to_dict()})
 
-    # Se la richiesta non è POST, ritorna la pagina con il modulo
-    return render(request, 'details.html', {'myphone': phone, 'default_characteristics': DEFAULT_CHARACTERISTICS})
+def add_function(request, phone_id):
+    phone = get_object_or_404(MyPhone, id=phone_id)
+
+    if request.method == 'POST':
+        function = request.POST.get('function')
+        value = request.POST.get('value')
+        if function and value:
+            phone.functions[function] = value
+            phone.save()
+
+    return render(request, 'detailsF.html', {
+        'myphone': phone,
+        'default_functions': MyFunction.to_dict(),
+    })

@@ -12,6 +12,7 @@ Details about {{ myphone.name }}
     <p>ID: {{ myphone.id }}</p>
     <p>Date: {{ myphone.date }}</p>
 
+    <h2>Characteristics</h2>
     <ul id="characteristics-list">
       {% for key, value in myphone.characteristics.items %}
       <li>{{ key }}: {{ value }}</li>
@@ -37,7 +38,8 @@ Details about {{ myphone.name }}
 
       <button type="submit">Add Specific</button>
     </form>
-
+    
+    <p><a href="{% url 'detailsF' id=myphone.id %}">Add Function</a></p>
     <p><a href="/phone">Back to Phone</a></p>
   </div>
 
@@ -70,7 +72,6 @@ Details about {{ myphone.name }}
       style="position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 50%; 
       background-color: #007BFF; color: white; border: none; cursor: pointer;">↻</button>
   </div>
-
 
   <script>
     // Recupera il colore dal localStorage o dalle caratteristiche del telefono
@@ -113,10 +114,30 @@ const logoImg = document.getElementById("logo-img");
 function updateLogo(brand) {
   if (brand && logoMap[brand]) {
     logoImg.src = logoMap[brand]; // Aggiorna il logo con il path dell'immagine
+    logoImg.alt = brand; // Imposta l'alt del logo con il brand
+    logoImg.style.display = "block"; // Mostra l'immagine
+    brandText.style.display = "none"; // Nascondi il testo
   } else {
-    logoImg.src = ""; // Nessun logo disponibile
+    logoImg.style.display = "none"; // Nascondi l'immagine
+    brandText.style.display = "block"; // Mostra il testo "Nessun brand"
+    brandText.textContent = "Nessun brand"; // Imposta il testo
   }
 }
+
+const brandText = document.createElement("div");
+brandText.style.position = "absolute";
+brandText.style.top = "50%";
+brandText.style.left = "50%";
+brandText.style.transform = "translate(-50%, -50%)";
+brandText.style.color = "white";
+brandText.style.fontSize = "20px";
+brandText.style.fontWeight = "bold";
+brandText.style.textAlign = "center";
+brandText.style.display = "none"; // Inizialmente nascosto
+
+// Aggiungi il testo alla div che contiene il logo
+const logoContainer = document.getElementById("phone-logo");
+logoContainer.appendChild(brandText);
 
 // Mostra il logo del brand iniziale
 const initialBrand = "{{ myphone.characteristics.Brand|default:'' }}";
@@ -199,7 +220,7 @@ function updateCameras(numCameras) {
   const frame = document.createElement("div");
   frame.style.position = "absolute";
   frame.style.top = "10px";
-  frame.style.left = "15px"; 
+  frame.style.left = "20px"; 
   frame.style.borderRadius = "20px"; // Bordi arrotondati
   frame.style.border = `2px solid black`; // Cornice nera
   
@@ -224,8 +245,8 @@ function updateCameras(numCameras) {
       frame.style.width = `${cameraWidth + 2 * 5}px`; // Per 1 o 2 telecamere, dimensione rettangolare
       frame.style.height = `${cameraWidth + (numCameras - 1) * spaceBetween + 2 * 5}px`; // Altezza variabile per 2 telecamere
     } else if (numCameras === 3 || numCameras === 4) {
-      frame.style.width = `${cameraWidth * 1.2 + spaceBetween}px`; // Per 3 o 4 telecamere, dimensione quadrata
-      frame.style.height = `${cameraWidth * 1.2 + spaceBetween}px`; // Altezza quadrata
+      frame.style.width = `${cameraWidth * 1.1 + spaceBetween}px`; // Per 3 o 4 telecamere, dimensione quadrata
+      frame.style.height = `${cameraWidth * 1.1 + spaceBetween}px`; // Altezza quadrata
     }
 
     // Aggiungi la cornice al contenitore delle telecamere
@@ -237,7 +258,7 @@ function updateCameras(numCameras) {
       camera.classList.add("camera");
       camera.style.position = "absolute";
       camera.style.top = `10px`; // Posizione in alto
-      camera.style.left = `${(frame.offsetWidth - cameraWidth) / 6 + offsetX}px`; // Centrato orizzontalmente e spostato a destra
+      camera.style.left = `${(frame.offsetWidth - cameraWidth) / 10 + offsetX}px`; // Centrato orizzontalmente e spostato a destra
       camera.style.width = `${cameraWidth}px`;
       camera.style.height = `${cameraWidth}px`;
       camera.style.borderRadius = "50%";
@@ -251,7 +272,7 @@ function updateCameras(numCameras) {
 
         // Posizione verticale
         camera.style.top = `${i * spaceBetween + 10}px`; // Spaziatura verticale
-        camera.style.left = `${(frame.offsetWidth - cameraWidth) / 6 + offsetX}px`; // Centrato orizzontalmente e spostato a destra
+        camera.style.left = `${(frame.offsetWidth - cameraWidth) / 25 + offsetX}px`; // Centrato orizzontalmente e spostato a destra
 
         camera.style.width = `${cameraWidth}px`;
         camera.style.height = `${cameraWidth}px`;
@@ -267,13 +288,13 @@ function updateCameras(numCameras) {
 
         if (i === 0) {
           camera.style.top = `10px`;
-          camera.style.left = `${(frame.offsetWidth - cameraWidth) / 6 + offsetX}px`;
+          camera.style.left = `${(frame.offsetWidth - cameraWidth) / 20 + offsetX}px`;
         } else if (i === 1) {
           camera.style.top = `${spaceBetween + 10}px`;
-          camera.style.left = `${(frame.offsetWidth - cameraWidth) / 6 + offsetX}px`;
+          camera.style.left = `${(frame.offsetWidth - cameraWidth) / 20 + offsetX}px`;
         } else if (i === 2) {
           camera.style.top = `${spaceBetween + 10 - 25}px`;
-          camera.style.left = `${(frame.offsetWidth - cameraWidth) / 7 + offsetX + spaceBetween * 0.8}px`;
+          camera.style.left = `${(frame.offsetWidth - cameraWidth) / 20 + offsetX + spaceBetween * 0.8}px`;
         }
 
         camera.style.width = `${cameraWidth}px`;
@@ -294,7 +315,7 @@ function updateCameras(numCameras) {
         const adjustedSpaceBetween = spaceBetween * 0.9;
 
         camera.style.top = `${row * adjustedSpaceBetween + 10}px`;
-        camera.style.left = `${col * adjustedSpaceBetween + (frame.offsetWidth - cameraWidth * 2) / 10 + offsetX}px`; // Spostato a destra
+        camera.style.left = `${col * adjustedSpaceBetween + (frame.offsetWidth - cameraWidth * 2) / 20 + offsetX}px`; // Spostato a destra
 
         camera.style.width = `${cameraWidth}px`;
         camera.style.height = `${cameraWidth}px`;

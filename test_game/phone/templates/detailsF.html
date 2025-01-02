@@ -1,0 +1,108 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}
+Details about {{ myphone.name }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="box">
+    <h1>{{ myphone.name }}</h1>
+
+    <p>ID: {{ myphone.id }}</p>
+    <p>Date: {{ myphone.date }}</p>
+
+    <h2>Functions</h2>
+    <ul id="functions-list">
+      {% for key, value in myphone.functions.items %}
+      <li>{{ key }}: {{ value }}</li>
+      {% endfor %}
+    </ul>
+
+    <form action="{% url 'add_function' phone_id=myphone.id %}" method="POST">
+      {% csrf_token %}
+      <label for="function">Choose a Function:</label>
+      <select name="function" id="function">
+        <option value>Select a function</option>
+        {% for key, values in default_functions.items %}
+        {% if key not in myphone.functions %}
+        <option value="{{ key }}" data-values="{{ values|join:',' }}">{{ key }}</option>
+        {% endif %}
+        {% endfor %}
+      </select>
+
+      <label for="value">Value:</label>
+      <select name="value" id="value">
+        <option value>Select a value</option>
+      </select>
+
+      <button type="submit">Add Function</button>
+    </form>
+
+    <p><a href="{% url 'details' id=myphone.id %}">Back to Phone</a></p> </div>
+
+  <div class="box" style="position: relative;">
+    <div id="phone-image" style="position: relative;">
+      <div id="phone-front"
+        style="position: absolute; width: 100%; height: 100%; border-radius: 40px; display: block;">
+        <div id="phone-screen-on"
+          style="background-image: url('{% static 'sfondo/sfondo_on.png' %}'); background-size: 250px;">
+          <p id="function-text"
+            style="color: white; font-size: 25px; padding: 20px;">
+            {% for key, value in myphone.functions.items %}
+            {% if value == 'Yes' %}
+            <span>{{ key }}</span><br>
+            {% endif %}
+            {% endfor %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Aggiorna il menu dei valori in base alla funzione selezionata
+  document.getElementById('function').addEventListener('change', function () {
+    const selectedFunction = this.options[this.selectedIndex];
+    const values = selectedFunction.getAttribute('data-values');
+
+    // Ottieni il menu a tendina dei valori
+    const valueDropdown = document.getElementById('value');
+
+    // Svuota il menu dei valori
+    valueDropdown.innerHTML = '<option value="">Select a value</option>';
+
+    // Aggiungi le nuove opzioni
+    if (values) {
+      values.split(',').forEach(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        valueDropdown.appendChild(option);
+      });
+    }
+  });
+
+  let currentColor;
+
+  // Controlla se il colore è presente nel localStorage per questo telefono
+  const phoneId = {{ myphone.id|safe }}; // Usa l'ID del telefono come chiave unica
+  const storedColor = localStorage.getItem(`phoneColor_${phoneId}`);
+
+  if (storedColor) {
+    currentColor = storedColor; // Colore salvato in precedenza
+  } else if ("Color" in {{ myphone.characteristics|safe }} && "{{ myphone.characteristics.Color|default:'' }}") {
+    currentColor = "{{ myphone.characteristics.Color|default:'' }}".toLowerCase(); // Colore dalla caratteristica
+  } else {
+    currentColor = "gray"; // Colore di default
+  }
+
+  // Imposta il colore iniziale del telefono
+  const phoneImage = document.getElementById("phone-image");
+  phoneImage.style.backgroundColor = currentColor;
+
+</script>
+
+{% endblock %}
